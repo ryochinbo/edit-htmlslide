@@ -1,0 +1,136 @@
+/* HTMLスライドエディター UI */
+:root{
+  --bg:#f3f3f5; --panel:#fff; --line:#dcdce1; --ink:#1f2328; --muted:#6b7280;
+  --accent:#2563eb; --accent-weak:#dbe7ff; --danger:#dc2626;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:13px/1.4 "Yu Gothic UI","Hiragino Sans","Noto Sans JP",system-ui,sans-serif}
+body{display:flex;flex-direction:column;overflow:hidden}
+[hidden]{display:none!important}
+button,select,input{font:inherit;color:inherit}
+button{height:30px;padding:0 10px;border:1px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;white-space:nowrap}
+button:hover{background:#f0f2f6}
+button:disabled{opacity:.45;cursor:default}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.primary:hover{background:#1d4fd0}
+button.on{background:var(--accent-weak);border-color:var(--accent)}
+select,input[type=number],input[type=text]{height:28px;padding:0 6px;border:1px solid var(--line);border-radius:5px;background:#fff}
+input[type=number]{width:72px}
+input[type=color]{width:38px;height:28px;padding:1px;border:1px solid var(--line);border-radius:5px;background:#fff;cursor:pointer}
+
+/* ツールバー */
+#toolbar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+#toolbar .group{display:flex;align-items:center;gap:4px}
+#toolbar .sep{width:1px;height:24px;background:var(--line)}
+#toolbar .spacer{flex:1}
+#toolbar .glabel{color:var(--muted);margin-right:2px}
+.filename{max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;padding:0 4px}
+
+/* ファイルを開くダイアログ */
+#openDlg{width:min(860px,94vw)}
+.open-wrap{padding:16px 18px;display:flex;flex-direction:column;height:min(560px,86vh)}
+.open-wrap h3{margin:0 0 12px}
+.open-body{flex:1;display:flex;gap:12px;min-height:0}
+.open-side{width:220px;overflow:auto;border-right:1px solid var(--line);padding-right:10px}
+.side-title{margin:10px 0 4px;color:var(--muted);font-size:11px;font-weight:700}
+.side-title:first-child{margin-top:0}
+.side-item{display:block;width:100%;height:auto;padding:5px 8px;margin:1px 0;border:0;border-radius:5px;background:none;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.side-item:hover{background:#eef2f8}
+.side-item small{display:block;color:var(--muted);font-size:10px;overflow:hidden;text-overflow:ellipsis}
+.open-main{flex:1;display:flex;flex-direction:column;min-width:0}
+.open-path{display:flex;gap:6px;margin-bottom:8px}
+.open-path input{flex:1;min-width:0}
+#openList{flex:1;overflow:auto;border:1px solid var(--line);border-radius:6px;outline:none}
+.fs-row{display:flex;align-items:center;gap:8px;padding:6px 10px;cursor:default;user-select:none;border-bottom:1px solid #f1f1f4}
+.fs-row:hover{background:#f4f7fc}
+.fs-row.sel{background:var(--accent-weak)}
+.fs-row .ic{width:18px;text-align:center}
+.fs-row .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fs-row .dt{color:var(--muted);font-size:11px}
+.fs-row.html .nm{font-weight:700}
+.fs-empty{padding:20px;color:var(--muted);text-align:center}
+.open-foot{padding-top:6px}
+.save-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+.save-row label{font-weight:700;white-space:nowrap}
+.save-row input{flex:1;min-width:0}
+.open-wrap menu{display:flex;align-items:center;gap:8px;margin:12px 0 0;padding:0}
+.open-wrap menu .spacer{flex:1}
+#status{color:var(--muted);max-width:420px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#status.ok{color:#15803d}#status.err{color:var(--danger)}#status.dirty{color:#b45309}
+.ico{display:inline-block;width:16px;height:12px;border:2px solid currentColor;vertical-align:-2px}
+.ico-round{border-radius:4px}.ico-ellipse{border-radius:50%}
+.ico-tri{width:0;height:0;border:none;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:13px solid currentColor}
+.ico-line{width:18px;height:0;border-width:2px 0 0;transform:rotate(-30deg)}
+
+main{flex:1;display:flex;min-height:0}
+
+/* スライド一覧 */
+#slidesPanel{width:236px;display:flex;flex-direction:column;background:var(--panel);border-right:1px solid var(--line)}
+#thumbs{flex:1;overflow:auto;padding:10px 10px 4px}
+.thumb{position:relative;display:flex;gap:6px;margin-bottom:10px;cursor:pointer}
+.thumb .num{width:18px;text-align:right;color:var(--muted);padding-top:2px}
+.thumb .frame{position:relative;width:192px;height:108px;border:2px solid transparent;border-radius:3px;outline:1px solid var(--line);background:#fff;overflow:hidden}
+.thumb iframe{width:192px;height:108px;border:0;pointer-events:none;display:block}
+.thumb.active .frame{border-color:var(--accent);outline-color:var(--accent)}
+.thumb:hover .frame{outline-color:#9aa4b2}
+.slide-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:8px;border-top:1px solid var(--line)}
+.slide-actions button{padding:0 4px}
+
+/* 編集領域 */
+#stageWrap{position:relative;flex:1;min-width:0;background:#e4e4e7}
+#stage{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+#hitLayer{position:absolute;inset:0;cursor:default}
+#overlay{position:fixed;inset:0;pointer-events:none;z-index:5}
+#hoverBox,#selBox{position:fixed;pointer-events:none}
+#hoverBox{outline:1px dashed #60a5fa}
+#selBox{outline:2px solid var(--accent)}
+#selBox .h{position:absolute;width:10px;height:10px;margin:-5px 0 0 -5px;background:#fff;border:1.5px solid var(--accent);border-radius:2px;pointer-events:auto}
+#selBox.editing .h{display:none}
+#selBox.editing{outline-style:dashed}
+.h[data-h=nw]{left:0;top:0;cursor:nwse-resize}.h[data-h=n]{left:50%;top:0;cursor:ns-resize}.h[data-h=ne]{left:100%;top:0;cursor:nesw-resize}
+.h[data-h=e]{left:100%;top:50%;cursor:ew-resize}.h[data-h=se]{left:100%;top:100%;cursor:nwse-resize}.h[data-h=s]{left:50%;top:100%;cursor:ns-resize}
+.h[data-h=sw]{left:0;top:100%;cursor:nesw-resize}.h[data-h=w]{left:0;top:50%;cursor:ew-resize}
+#selLabel{position:absolute;left:-2px;bottom:100%;margin-bottom:4px;padding:2px 6px;background:var(--accent);color:#fff;font-size:11px;border-radius:3px;white-space:nowrap}
+.guide{position:fixed;background:#f43f5e;pointer-events:none}
+.guide.v{width:1px}.guide.h{height:1px}
+#hint{position:absolute;left:0;right:0;bottom:6px;text-align:center;color:#71717a;font-size:11px;pointer-events:none}
+#dragShield{position:fixed;inset:0;z-index:20}
+
+/* プロパティ */
+#props{width:280px;overflow:auto;background:var(--panel);border-left:1px solid var(--line)}
+.pane{padding:12px}
+.pane h3{margin:0 0 10px;font-size:14px;word-break:break-all}
+fieldset{margin:0 0 12px;padding:8px 10px 10px;border:1px solid var(--line);border-radius:8px}
+legend{padding:0 4px;color:var(--muted);font-weight:700}
+.scope{font-weight:400;font-size:11px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px 8px;margin-bottom:6px}
+.grid2 label{display:flex;align-items:center;justify-content:space-between;gap:4px}
+.grid2 input[type=number]{width:64px}
+.row{display:flex;align-items:center;gap:6px;margin:6px 0}
+.row input[type=range]{flex:1}
+.chk{display:flex;align-items:center;gap:3px;color:var(--muted)}
+.btnrow{display:flex;gap:4px;margin:6px 0;flex-wrap:wrap}
+.btnrow button{flex:1;padding:0 6px}
+.note{color:var(--muted);font-size:12px}
+#pFont{flex:1}
+
+@media (max-width:1100px){
+  #hint{display:none}
+  #slidesPanel{width:150px}
+  .thumb .num{display:none}
+  .thumb .frame{width:128px;height:72px}
+  .thumb iframe{width:192px;height:108px;transform:scale(.6667);transform-origin:0 0}
+  .slide-actions{grid-template-columns:1fr 1fr}
+  #props{width:240px}
+}
+
+/* エクスポートダイアログ */
+dialog{width:440px;padding:0;border:1px solid var(--line);border-radius:10px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+dialog::backdrop{background:rgba(15,23,42,.35)}
+dialog form{padding:16px 18px}
+dialog h3{margin:0 0 12px}
+dialog fieldset label{display:flex;align-items:center;gap:6px;margin:4px 0}
+dialog #ePages{width:140px}
+dialog menu{display:flex;justify-content:flex-end;gap:8px;margin:12px 0 0;padding:0}
+#eResult{font-size:12px;max-height:160px;overflow:auto;white-space:pre-wrap}
+#eResult.err{color:var(--danger)}#eResult.ok{color:#15803d}

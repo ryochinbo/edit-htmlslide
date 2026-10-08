@@ -1,0 +1,1 @@
+﻿{"version":"0.0.1","configurations":[{"name":"slide-editor","runtimeExecutable":"node","runtimeArgs":["server.js"],"port":5180}]}

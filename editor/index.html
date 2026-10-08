@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTMLスライドエディター</title>
+<link rel="stylesheet" href="editor.css">
+</head>
+<body>
+
+<header id="toolbar">
+  <div class="group">
+    <button id="btnOpen" title="ファイルを開く (Ctrl+O)">📂 開く</button>
+    <span id="fileName" class="filename">（ファイル未選択）</span>
+    <button id="btnSave" class="primary" title="HTMLを上書き保存 (Ctrl+S)">上書き保存</button>
+    <button id="btnSaveAs" title="名前を付けて保存 (Ctrl+Shift+S)">名前を付けて保存</button>
+    <button id="btnExport" title="HTML / PDF / 画像で書き出し (Ctrl+E)">エクスポート</button>
+    <button id="btnPreview" title="保存済みのスライドショーを新しいタブで開く">▶ 再生</button>
+  </div>
+  <div class="sep"></div>
+  <div class="group">
+    <button id="btnUndo" title="元に戻す (Ctrl+Z)">↶</button>
+    <button id="btnRedo" title="やり直し (Ctrl+Y)">↷</button>
+  </div>
+  <div class="sep"></div>
+  <div class="group" id="insertGroup">
+    <span class="glabel">挿入</span>
+    <button data-insert="text" title="テキストボックス">Ａ テキスト</button>
+    <button data-insert="rect" title="四角形"><span class="ico ico-rect"></span></button>
+    <button data-insert="round" title="角丸四角形"><span class="ico ico-round"></span></button>
+    <button data-insert="ellipse" title="楕円"><span class="ico ico-ellipse"></span></button>
+    <button data-insert="triangle" title="三角形"><span class="ico ico-tri"></span></button>
+    <button data-insert="line" title="直線"><span class="ico ico-line"></span></button>
+    <button data-insert="arrow" title="矢印">➝</button>
+    <button data-insert="image" title="画像">🖼 画像</button>
+    <input type="file" id="imageInput" accept="image/*" hidden>
+  </div>
+  <div class="sep"></div>
+  <div class="group">
+    <button id="btnDup" title="複製 (Ctrl+D)">複製</button>
+    <button id="btnDelete" title="削除 (Delete)">削除</button>
+    <button id="btnFront" title="最前面へ">最前面</button>
+    <button id="btnBack" title="最背面へ">最背面</button>
+  </div>
+  <div class="spacer"></div>
+  <div id="status"></div>
+</header>
+
+<main>
+  <aside id="slidesPanel">
+    <div id="thumbs"></div>
+    <div class="slide-actions">
+      <button id="btnAddSlide" title="空白スライドを追加">＋ 空白</button>
+      <button id="btnAddTitleSlide" title="タイトル付きスライドを追加">＋ タイトル</button>
+      <button id="btnDupSlide" title="スライドを複製">複製</button>
+      <button id="btnDelSlide" title="スライドを削除">削除</button>
+      <button id="btnSlideUp" title="上へ移動">↑</button>
+      <button id="btnSlideDown" title="下へ移動">↓</button>
+    </div>
+  </aside>
+
+  <section id="stageWrap">
+    <iframe id="stage" title="スライド編集領域"></iframe>
+    <div id="hitLayer"></div>
+    <div id="overlay">
+      <div id="hoverBox" hidden></div>
+      <div id="selBox" hidden>
+        <div class="h" data-h="nw"></div><div class="h" data-h="n"></div><div class="h" data-h="ne"></div>
+        <div class="h" data-h="e"></div><div class="h" data-h="se"></div><div class="h" data-h="s"></div>
+        <div class="h" data-h="sw"></div><div class="h" data-h="w"></div>
+        <div id="selLabel"></div>
+      </div>
+      <div id="guideV" class="guide v" hidden></div>
+      <div id="guideH" class="guide h" hidden></div>
+    </div>
+    <div id="hint">クリック：選択　/　もう一度クリック：内側の要素を選択　/　Esc：外側を選択　/　ダブルクリック：文字を編集　/　ドラッグ：移動（Shiftで軸固定、Altでスナップ無効）</div>
+  </section>
+
+  <aside id="props">
+    <div id="propsEmpty" class="pane">
+      <h3>スライド</h3>
+      <label class="row">背景色 <input type="color" id="slideBg"></label>
+      <p class="note">要素をクリックすると、色・文字サイズ・位置などを編集できます。</p>
+    </div>
+
+    <div id="propsElem" class="pane" hidden>
+      <h3 id="elemTitle">要素</h3>
+
+      <fieldset>
+        <legend>位置とサイズ（px）</legend>
+        <div class="grid2">
+          <label>X <input type="number" id="pX" step="1"></label>
+          <label>Y <input type="number" id="pY" step="1"></label>
+          <label>幅 <input type="number" id="pW" step="1"></label>
+          <label>高さ <input type="number" id="pH" step="1"></label>
+        </div>
+        <label class="row">回転 <input type="number" id="pRot" step="1" value="0"> °</label>
+      </fieldset>
+
+      <fieldset id="textFs">
+        <legend>文字 <span id="textScope" class="scope"></span></legend>
+        <div class="grid2">
+          <label>サイズ <input type="number" id="pFontSize" min="4" step="1"></label>
+          <label>文字色 <input type="color" id="pColor"></label>
+        </div>
+        <div class="btnrow">
+          <button id="bBold" title="太字"><b>B</b></button>
+          <button id="bItalic" title="斜体"><i>I</i></button>
+          <button id="bUnderline" title="下線"><u>U</u></button>
+          <button id="bSizeDown" title="小さく">A−</button>
+          <button id="bSizeUp" title="大きく">A＋</button>
+        </div>
+        <div class="btnrow">
+          <button data-align="left" title="左揃え">左</button>
+          <button data-align="center" title="中央揃え">中央</button>
+          <button data-align="right" title="右揃え">右</button>
+          <button data-align="justify" title="両端揃え">両端</button>
+        </div>
+        <label class="row">行間 <input type="number" id="pLineHeight" min="0.5" max="4" step="0.05"></label>
+        <label class="row">フォント
+          <select id="pFont">
+            <option value="">（変更しない）</option>
+            <option value='"Noto Sans JP","Hiragino Sans","Yu Gothic",Arial,sans-serif'>ゴシック</option>
+            <option value='"Noto Serif JP","Hiragino Mincho ProN","Yu Mincho",serif'>明朝</option>
+            <option value="Arial,sans-serif">Arial</option>
+            <option value='Georgia,serif'>Georgia</option>
+          </select>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>塗りと枠線</legend>
+        <label class="row">塗り <input type="color" id="pBg"> <label class="chk"><input type="checkbox" id="pBgNone">なし</label></label>
+        <label class="row">枠線色 <input type="color" id="pBorderColor"></label>
+        <div class="grid2">
+          <label>枠線幅 <input type="number" id="pBorderWidth" min="0" step="1"></label>
+          <label>角丸 <input type="number" id="pRadius" min="0" step="1"></label>
+        </div>
+        <label class="row">不透明度 <input type="range" id="pOpacity" min="0" max="1" step="0.05"> <span id="pOpacityVal"></span></label>
+      </fieldset>
+
+      <fieldset id="imgFs" hidden>
+        <legend>画像</legend>
+        <button id="bReplaceImg">画像を差し替え</button>
+      </fieldset>
+
+      <fieldset>
+        <legend>選択</legend>
+        <div class="btnrow">
+          <button id="bParent" title="外側の要素を選択 (Esc)">外側を選択</button>
+          <button id="bEditText" title="文字を編集 (Enter)">文字を編集</button>
+        </div>
+        <button id="bResetStyle" title="この要素に追加したインラインスタイルを消す">書式をリセット</button>
+      </fieldset>
+    </div>
+  </aside>
+</main>
+
+<dialog id="openDlg">
+  <div class="open-wrap">
+    <h3 id="openTitle">ファイルを開く</h3>
+    <div class="open-body">
+      <nav class="open-side">
+        <div class="side-title">最近使ったファイル</div>
+        <div id="openRecent"></div>
+        <div class="side-title">場所</div>
+        <div id="openPlaces"></div>
+        <div class="side-title" id="drivesTitle">ドライブ</div>
+        <div id="openDrives"></div>
+      </nav>
+      <section class="open-main">
+        <div class="open-path">
+          <button id="openUp" title="1つ上のフォルダへ">↑</button>
+          <input type="text" id="openPathInput" spellcheck="false" title="フォルダかHTMLファイルのパスを入力して Enter">
+          <button id="openGo">移動</button>
+        </div>
+        <div id="openList" tabindex="0"></div>
+        <div class="save-row" id="saveRow" hidden>
+          <label for="saveNameInput">ファイル名</label>
+          <input type="text" id="saveNameInput" spellcheck="false">
+        </div>
+        <div class="open-foot">
+          <span class="note" id="openNote">HTMLファイルとフォルダのみ表示。ダブルクリックで開きます。</span>
+        </div>
+      </section>
+    </div>
+    <menu>
+      <button id="openNative" type="button" title="Windows標準の「開く」ダイアログで選ぶ">Windowsのダイアログで選ぶ…</button>
+      <span class="spacer"></span>
+      <button id="openCancel" type="button">キャンセル</button>
+      <button id="openOk" class="primary" type="button" disabled>開く</button>
+    </menu>
+  </div>
+</dialog>
+
+<dialog id="exportDlg">
+  <form method="dialog">
+    <h3>エクスポート</h3>
+    <fieldset>
+      <legend>形式</legend>
+      <label><input type="radio" name="etype" value="html" checked> HTML（元ファイルに上書き保存）</label>
+      <label><input type="radio" name="etype" value="saveas"> HTML（名前を付けて保存）</label>
+      <label><input type="radio" name="etype" value="pdf"> PDF（1ページ＝1スライド）</label>
+      <label><input type="radio" name="etype" value="png"> 画像（PNG・1280×720）</label>
+    </fieldset>
+    <fieldset id="pageFs">
+      <legend>ページ</legend>
+      <label><input type="radio" name="escope" value="all" checked> 全ページ</label>
+      <label><input type="radio" name="escope" value="pick"> 指定 <input type="text" id="ePages" placeholder="例: 1,3-5"></label>
+      <label id="sheetRow"><input type="checkbox" id="eSheet" checked> 一覧画像（contact-sheet.png）も作成</label>
+    </fieldset>
+    <p id="eDest" class="note"></p>
+    <div id="eResult"></div>
+    <menu>
+      <button value="cancel">閉じる</button>
+      <button id="eRun" class="primary" type="button">書き出し</button>
+    </menu>
+  </form>
+</dialog>
+
+<div id="dragShield" hidden></div>
+<script src="editor.js"></script>
+</body>
+</html>
